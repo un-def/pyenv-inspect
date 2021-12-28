@@ -1,0 +1,65 @@
+[build-system]
+requires = ['poetry-core']
+build-backend = 'poetry.core.masonry.api'
+
+[tool.poetry]
+name = 'pyenv-inspect'
+version = '0.1.0.dev0'
+description = 'An auxiliary library for the virtualenv-pyenv plugin'
+license = 'MIT'
+authors = ['un.def <me@undef.im>']
+readme = 'README.md'
+homepage = 'https://github.com/un-def/pyenv-inspect'
+repository = 'https://github.com/un-def/pyenv-inspect'
+keywords = ['pyenv']
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'Topic :: Software Development :: Libraries',
+    'Topic :: Utilities',
+]
+packages = [{include = 'pyenv_inspect', from = 'src'}]
+
+[tool.poetry.dependencies]
+python = '^3.7'
+
+[tool.isort]
+lines_after_imports = 2
+multi_line_output = 5
+include_trailing_comma = true
+use_parentheses = true
+sections = ['FUTURE', 'STDLIB', 'THIRDPARTY', 'FIRSTPARTY', 'LOCALFOLDER', 'TESTS']
+known_first_party = ['pyenv_inspect']
+known_tests = ['tests']
+
+[tool.pytest.ini_options]
+minversion = '6.0'
+testpaths = ['tests']
+
+[tool.tox]
+legacy_tox_ini = '''
+[tox]
+envlist =
+    py37
+    py38
+    py39
+    py310
+    flake8
+    isort
+isolated_build = true
+
+[testenv]
+deps =
+    pytest
+commands = pytest {posargs}
+
+[testenv:flake8]
+skip_install = true
+deps = flake8
+commands = flake8 {posargs}
+
+[testenv:isort]
+skip_install = true
+deps = isort
+commands = isort {posargs:. -c}
+'''
