@@ -4,7 +4,7 @@ import enum
 import re
 from typing import NamedTuple, Optional
 
-from .exceptions import SpecParseError
+from .exceptions import SpecParseError, UnsupportedImplementation
 from .version import VERSION_PATTERN
 
 
@@ -44,3 +44,9 @@ class PyenvPythonSpec(NamedTuple):
             'implementation': self.implementation.value,
             'version': self.version,
         }
+
+    def is_supported(self, *, raise_exception: bool = False) -> bool:
+        supported = self.implementation == Implementation.CPYTHON
+        if not supported and raise_exception:
+            raise UnsupportedImplementation
+        return supported
