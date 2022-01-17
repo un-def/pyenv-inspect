@@ -5,6 +5,8 @@ import re
 from functools import partial
 from typing import Any, Optional, Tuple
 
+from .exceptions import VersionParseError
+
 
 VERSION_PATTERN = (
     r'(?P<base>\d(?:\.\d+){1,2})(?:(?P<pre>(?:a|b|rc)\d+)?|-(?P<dev>dev))')
@@ -102,10 +104,10 @@ class Version:
         )
 
     @classmethod
-    def from_string_version(cls, string_version: str) -> Optional['Version']:
+    def from_string_version(cls, string_version: str) -> Optional[Version]:
         match = VERSION_REGEX.fullmatch(string_version)
         if not match:
-            return None
+            raise VersionParseError(string_version)
         fields = match.groupdict()
         fields['base'] = tuple(map(int, fields['base'].split('.')))
         pre = fields['pre']

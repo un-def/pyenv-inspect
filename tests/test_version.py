@@ -1,5 +1,6 @@
 import pytest
 
+from pyenv_inspect.exceptions import VersionParseError
 from pyenv_inspect.version import Version
 
 from tests.testlib import spec_fixture
@@ -11,9 +12,12 @@ from tests.testlib import spec_fixture
     if spec_dict['implementation'] == 'cpython'
 ])
 def test_parse_fixture_cpython_specs(string_version):
-    version = Version.from_string_version(string_version)
+    Version.from_string_version(string_version)
 
-    assert version is not None
+
+def test_parse_error():
+    with pytest.raises(VersionParseError):
+        Version.from_string_version('1.a.0')
 
 
 @pytest.mark.parametrize('str_v1,str_v2,expected', [
