@@ -2,7 +2,8 @@ import pytest
 
 from pyenv_inspect.exceptions import PathError
 from pyenv_inspect.path import (
-    get_pyenv_python_bin_path, get_pyenv_root, get_pyenv_versions_directory,
+    get_pyenv_python_executable_path, get_pyenv_root,
+    get_pyenv_versions_directory,
 )
 
 from tests.testlib import BaseTestClass
@@ -111,24 +112,24 @@ class TestGetPyenvPythonExecutablePath(BaseTestClass):
     def test_ok(version_dir, exec_path):
         exec_path.touch(mode=0o777)
 
-        assert get_pyenv_python_bin_path(version_dir) == exec_path
+        assert get_pyenv_python_executable_path(version_dir) == exec_path
 
     def test_error_does_not_exist(version_dir):
         message = f'pyenv python binary does not exist: {version_dir}'
 
         with pytest.raises(PathError, match=message):
-            get_pyenv_python_bin_path(version_dir)
+            get_pyenv_python_executable_path(version_dir)
 
     def test_error_not_a_file(version_dir, exec_path):
         exec_path.mkdir()
         message = f'pyenv python binary is not a file: {version_dir}'
 
         with pytest.raises(PathError, match=message):
-            get_pyenv_python_bin_path(version_dir)
+            get_pyenv_python_executable_path(version_dir)
 
     def test_error_not_executable(version_dir, exec_path):
         exec_path.touch(mode=0o666)
         message = f'pyenv python binary is not executable: {version_dir}'
 
         with pytest.raises(PathError, match=message):
-            get_pyenv_python_bin_path(version_dir)
+            get_pyenv_python_executable_path(version_dir)
