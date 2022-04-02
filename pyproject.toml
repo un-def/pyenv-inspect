@@ -5,7 +5,7 @@ build-backend = 'poetry.core.masonry.api'
 [tool.poetry]
 name = 'pyenv-inspect'
 version = '0.2.0.dev0'
-description = 'An auxiliary library for the virtualenv-pyenv plugin'
+description = 'An auxiliary library for the virtualenv-pyenv and tox-pyenv-redux plugins'
 license = 'MIT'
 authors = ['un.def <me@undef.im>']
 readme = 'README.md'
