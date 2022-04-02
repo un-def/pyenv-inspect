@@ -33,7 +33,7 @@ known_first_party = ['pyenv_inspect']
 known_tests = ['tests']
 
 [tool.pytest.ini_options]
-minversion = '6.0'
+minversion = '7.0'
 testpaths = ['tests']
 
 [tool.tox]
@@ -50,7 +50,7 @@ isolated_build = true
 
 [testenv]
 deps =
-    pytest
+    pytest >= 7.0
 commands = pytest {posargs}
 
 [testenv:flake8]
