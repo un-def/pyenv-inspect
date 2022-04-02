@@ -32,7 +32,9 @@ def get_pyenv_versions_directory() -> Path:
 def get_pyenv_python_bin_path(version_dir: Path) -> Path:
     bin_path = (version_dir / 'bin' / 'python').resolve()
     if not bin_path.exists():
-        raise PathError(f'pyenv python executable does not exist: {bin_path}')
+        raise PathError(f'pyenv python binary does not exist: {bin_path}')
     if not bin_path.is_file():
-        raise PathError(f'pyenv python executable is not a file: {bin_path}')
+        raise PathError(f'pyenv python binary is not a file: {bin_path}')
+    if not os.access(bin_path, os.X_OK):
+        raise PathError(f'pyenv python binary is not executable: {bin_path}')
     return bin_path
