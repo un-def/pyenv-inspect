@@ -14,7 +14,7 @@ from .version import Version
 log = logging.getLogger(__name__)
 
 
-def find_python_executable(spec: PyenvPythonSpec | str) -> Path | None:
+def find_pyenv_python_executable(spec: PyenvPythonSpec | str) -> Path | None:
     if not isinstance(spec, PyenvPythonSpec):
         if not isinstance(spec, str):
             raise TypeError(f'unexpected spec type: {type(spec)}')
@@ -26,7 +26,7 @@ def find_python_executable(spec: PyenvPythonSpec | str) -> Path | None:
     best_match_dir: Path | None = None
     for version_dir in get_pyenv_versions_directory().iterdir():
         try:
-            _spec = PyenvPythonSpec.from_string_spec(version_dir)
+            _spec = PyenvPythonSpec.from_string_spec(version_dir.name)
             _spec.is_supported(raise_exception=True)
             version = Version.from_string_version(_spec.version)
         except (ParseError, UnsupportedImplementation) as exc:

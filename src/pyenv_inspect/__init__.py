@@ -1,7 +1,7 @@
-from .inspect import find_python_executable
+from .inspect import find_pyenv_python_executable
 
 
 __version__ = '0.2.0.dev0'
 
 
-__all__ = ['__version__', 'find_python_executable']
+__all__ = ['__version__', 'find_pyenv_python_executable']
