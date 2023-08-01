@@ -38,7 +38,7 @@ def test_eq_ne(str_v1, str_v2, expected):
     ne_result = v1 != v2
 
     assert eq_result is expected
-    assert ne_result is not expected
+    assert ne_result is (not expected)
 
 
 @pytest.mark.parametrize('str_v1,str_v2,expected', [
@@ -63,7 +63,7 @@ def test_lt_ge(str_v1, str_v2, expected):
     ge_result = v1 >= v2
 
     assert lt_result is expected
-    assert ge_result is not expected
+    assert ge_result is (not expected)
 
 
 @pytest.mark.parametrize('str_v1,str_v2,expected', [
@@ -88,7 +88,7 @@ def test_gt_le(str_v1, str_v2, expected):
     le_result = v1 <= v2
 
     assert gt_result is expected
-    assert le_result is not expected
+    assert le_result is (not expected)
 
 
 @pytest.mark.parametrize('str_v1,str_v2,expected', [
