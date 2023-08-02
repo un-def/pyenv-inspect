@@ -9,7 +9,7 @@ from .exceptions import VersionParseError
 
 
 VERSION_PATTERN = (
-    r'(?P<base>\d(?:\.\d+){1,2})(?:(?P<pre>(?:a|b|rc)\d+)?|-(?P<dev>dev))')
+    r'(?P<base>\d(?:\.\d+){0,2})(?:(?P<pre>(?:a|b|rc)\d+)?|-(?P<dev>dev))')
 VERSION_REGEX = re.compile(VERSION_PATTERN)
 
 

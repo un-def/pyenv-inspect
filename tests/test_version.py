@@ -21,6 +21,7 @@ def test_parse_error():
 
 
 @pytest.mark.parametrize('str_v1,str_v2,expected', [
+    ('2', '2.0.0', True),
     ('2.0', '2.0.0', True),
     ('2.0-dev', '2.0.0-dev', True),
     ('2.0a1', '2.0.0a1', True),
@@ -42,10 +43,13 @@ def test_eq_ne(str_v1, str_v2, expected):
 
 
 @pytest.mark.parametrize('str_v1,str_v2,expected', [
+    ('2', '2.0.0', False),
     ('2.0', '2.0.0', False),
+    ('2', '2.0.1', True),
     ('2.0.0', '2.0.1', True),
     ('2.0', '2.0.1', True),
     ('2.0.1', '2.0.0', False),
+    ('2.0.1', '2', False),
     ('2.0-dev', '2.0', True),
     ('2.1-dev', '2.0', False),
     ('2.0a3', '2.0', True),
@@ -67,10 +71,13 @@ def test_lt_ge(str_v1, str_v2, expected):
 
 
 @pytest.mark.parametrize('str_v1,str_v2,expected', [
+    ('2', '2.0.0', False),
     ('2.0', '2.0.0', False),
     ('2.0.0', '2.0.1', False),
+    ('2', '2.0.1', False),
     ('2.0', '2.0.1', False),
     ('2.0.1', '2.0.0', True),
+    ('2.0.1', '2', True),
     ('2.0-dev', '2.0', False),
     ('2.1-dev', '2.0', True),
     ('2.0a3', '2.0', False),
@@ -92,6 +99,8 @@ def test_gt_le(str_v1, str_v2, expected):
 
 
 @pytest.mark.parametrize('str_v1,str_v2,expected', [
+    ('2.6.7', '2', True),
+    ('2.6.7', '3', False),
     ('2.6.7', '2.6', True),
     ('2.6.7', '2.6.7', True),
     ('2.6', '2.6.7', False),

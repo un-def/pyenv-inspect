@@ -24,14 +24,18 @@ class TestFindPyenvPythonExecutable:
     def prepare_versions(self, *versions):
         return [self.prepare_version(version) for version in versions]
 
-    @pytest.mark.parametrize('version', [
-        '3.7', PyenvPythonSpec.from_string_spec('3.7'),
-        '3.7.12', PyenvPythonSpec.from_string_spec('3.7.12'),
+    @pytest.mark.parametrize('requested,expected', [
+        ('3', '3.8.3'),
+        (PyenvPythonSpec.from_string_spec('3'), '3.8.3'),
+        ('3.7', '3.7.12'),
+        (PyenvPythonSpec.from_string_spec('3.7'), '3.7.12'),
+        ('3.7.1', '3.7.1'),
+        (PyenvPythonSpec.from_string_spec('3.7.1'), '3.7.1'),
     ])
-    def test_found(self, version):
+    def test_found(self, requested, expected):
         self.prepare_versions('3.7.2', '3.7.1', '3.7.12', '3.8.3')
-        assert find_pyenv_python_executable(version) == (
-            self.versions_dir / '3.7.12' / 'bin' / 'python')
+        assert find_pyenv_python_executable(requested) == (
+            self.versions_dir / expected / 'bin' / 'python')
 
     @pytest.mark.parametrize('version', ['3.9', '3.7.3'])
     def test_not_found(self, version):
