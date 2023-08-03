@@ -1,27 +1,41 @@
 [build-system]
-requires = ['poetry-core']
-build-backend = 'poetry.core.masonry.api'
+requires = ['setuptools']
+build-backend = 'setuptools.build_meta'
 
-[tool.poetry]
+[project]
 name = 'pyenv-inspect'
-version = '0.2.0'
 description = 'An auxiliary library for the virtualenv-pyenv and tox-pyenv-redux plugins'
-license = 'MIT'
-authors = ['un.def <me@undef.im>']
 readme = 'README.md'
-homepage = 'https://github.com/un-def/pyenv-inspect'
-repository = 'https://github.com/un-def/pyenv-inspect'
-keywords = ['pyenv']
+license = {file = 'LICENSE'}
+authors = [
+    {name = 'un.def', email = 'me@undef.im'},
+]
 classifiers = [
     'Development Status :: 4 - Beta',
+    'License :: OSI Approved :: MIT License',
     'Intended Audience :: Developers',
     'Topic :: Software Development :: Libraries',
     'Topic :: Utilities',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
 ]
-packages = [{include = 'pyenv_inspect', from = 'src'}]
+keywords = ['pyenv']
+requires-python = '>= 3.7'
+dynamic = ['version']
 
-[tool.poetry.dependencies]
-python = '^3.7'
+[project.urls]
+Homepage = 'https://github.com/un-def/pyenv-inspect'
+Repository = 'https://github.com/un-def/pyenv-inspect.git'
+
+[tool.setuptools.dynamic]
+version = {attr = 'pyenv_inspect.__version__'}
+
+[tool.setuptools]
+zip-safe = true
+include-package-data = false
 
 [tool.isort]
 lines_after_imports = 2
