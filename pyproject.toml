@@ -17,13 +17,13 @@ classifiers = [
     'Topic :: Software Development :: Libraries',
     'Topic :: Utilities',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
 ]
 keywords = ['pyenv']
-requires-python = '>= 3.7'
+requires-python = '>= 3.8'
 dynamic = ['version']
 
 [project.urls]
@@ -54,10 +54,10 @@ testpaths = ['tests']
 legacy_tox_ini = '''
 [tox]
 envlist =
-    py37
     py38
     py39
     py310
+    py311
     flake8
     isort
 isolated_build = true
