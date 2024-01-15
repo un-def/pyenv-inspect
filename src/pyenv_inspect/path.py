@@ -30,7 +30,10 @@ def get_pyenv_versions_directory() -> Path:
 
 
 def get_pyenv_python_executable_path(version_dir: Path) -> Path:
-    exec_path = (version_dir / 'bin' / 'python').resolve()
+    if os.name == 'nt':
+        exec_path = (version_dir / 'python.exe').resolve()
+    else:
+        exec_path = (version_dir / 'bin' / 'python').resolve()
     if not exec_path.exists():
         raise PathError(f'pyenv python binary does not exist: {exec_path}')
     if not exec_path.is_file():
