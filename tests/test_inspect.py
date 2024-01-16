@@ -4,8 +4,16 @@ from pyenv_inspect import find_pyenv_python_executable
 from pyenv_inspect.exceptions import UnsupportedImplementation
 from pyenv_inspect.spec import PyenvPythonSpec
 
+from tests.testlib import IS_POSIX, IS_WINDOWS
+
 
 class TestFindPyenvPythonExecutable:
+    if IS_POSIX:
+        exec_name = 'python'
+        bin_dir = 'bin'
+    elif IS_WINDOWS:
+        exec_name = 'python.exe'
+        bin_dir = ''
 
     @pytest.fixture(autouse=True)
     def setup(self, monkeypatch, tmp_path):
@@ -15,9 +23,9 @@ class TestFindPyenvPythonExecutable:
         self.versions_dir.mkdir(parents=True)
 
     def prepare_version(self, version):
-        bin_path = self.versions_dir / version / 'bin'
+        bin_path = self.versions_dir / version / self.bin_dir
         bin_path.mkdir(parents=True)
-        exec_path = bin_path / 'python'
+        exec_path = bin_path / self.exec_name
         exec_path.touch(mode=0o777)
         return exec_path
 
@@ -35,7 +43,7 @@ class TestFindPyenvPythonExecutable:
     def test_found(self, requested, expected):
         self.prepare_versions('3.7.2', '3.7.1', '3.7.12', '3.8.3')
         assert find_pyenv_python_executable(requested) == (
-            self.versions_dir / expected / 'bin' / 'python')
+            self.versions_dir / expected / self.bin_dir / self.exec_name)
 
     @pytest.mark.parametrize('version', ['3.9', '3.7.3'])
     def test_not_found(self, version):
