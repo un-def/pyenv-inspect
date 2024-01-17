@@ -6,9 +6,9 @@ build-backend = 'setuptools.build_meta'
 name = 'pyenv-inspect'
 description = 'An auxiliary library for the virtualenv-pyenv and tox-pyenv-redux plugins'
 readme = 'README.md'
-license = {file = 'LICENSE'}
+license = {text = 'MIT'}
 authors = [
-    {name = 'un.def', email = 'me@undef.im'},
+    {name = 'Dmitry Meyer', email = 'me@undef.im'},
 ]
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -30,6 +30,8 @@ dynamic = ['version']
 [project.urls]
 Homepage = 'https://github.com/un-def/pyenv-inspect'
 Repository = 'https://github.com/un-def/pyenv-inspect.git'
+Changelog = 'https://github.com/un-def/pyenv-inspect/releases'
+Issues = 'https://github.com/un-def/pyenv-inspect/issues'
 
 [tool.setuptools.dynamic]
 version = {attr = 'pyenv_inspect.__version__'}
