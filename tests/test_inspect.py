@@ -1,10 +1,21 @@
+import logging
 import pytest
 
 from pyenv_inspect import find_pyenv_python_executable
+from pyenv_inspect.inspect import log
 from pyenv_inspect.exceptions import UnsupportedImplementation
 from pyenv_inspect.spec import PyenvPythonSpec
 
 from tests.testlib import IS_POSIX, IS_WINDOWS
+
+
+class CapturingHandler(logging.Handler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.captured = []
+
+    def handle(self, record):
+        self.captured.append(record)
 
 
 class TestFindPyenvPythonExecutable:
@@ -32,6 +43,13 @@ class TestFindPyenvPythonExecutable:
     def prepare_versions(self, *versions):
         return [self.prepare_version(version) for version in versions]
 
+    def prepare_env(self, name, version):
+        self.prepare_version(version)
+        env_path = self.versions_dir / version / 'envs' / name
+        env_path.mkdir(parents=True)
+        link_path = self.versions_dir / name
+        link_path.symlink_to(env_path)
+
     @pytest.mark.parametrize('requested,expected', [
         ('3', '3.8.3'),
         (PyenvPythonSpec.from_string_spec('3'), '3.8.3'),
@@ -44,6 +62,17 @@ class TestFindPyenvPythonExecutable:
         self.prepare_versions('3.7.2', '3.7.1', '3.7.12', '3.8.3')
         assert find_pyenv_python_executable(requested) == (
             self.versions_dir / expected / self.bin_dir / self.exec_name)
+
+    def test_env_links_ignored(self):
+        self.prepare_env('dev-env', '3.12.9')
+        handler = CapturingHandler()
+        log.addHandler(handler)
+        try:
+            assert find_pyenv_python_executable('3.12') == (
+                self.versions_dir / '3.12.9' / self.bin_dir / self.exec_name)
+        finally:
+            log.removeHandler(handler)
+        assert len(handler.captured) == 0
 
     @pytest.mark.parametrize('version', ['3.9', '3.7.3'])
     def test_not_found(self, version):

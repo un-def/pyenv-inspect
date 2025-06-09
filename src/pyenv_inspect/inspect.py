@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os.path
 from pathlib import Path
 
 from .exceptions import ParseError, UnsupportedImplementation
@@ -24,7 +25,14 @@ def find_pyenv_python_executable(spec: PyenvPythonSpec | str) -> Path | None:
     log.debug('requested %s', requested_version)
     best_match_version: Version | None = None
     best_match_dir: Path | None = None
-    for version_dir in get_pyenv_versions_directory().iterdir():
+    versions_dir = get_pyenv_versions_directory()
+    for version_dir in versions_dir.iterdir():
+        if version_dir.is_symlink():
+            real_path = version_dir.resolve()
+            if os.path.commonpath([real_path, versions_dir]) == \
+                    os.path.commonpath([versions_dir]) and \
+                    'envs' in real_path.parts:
+                continue
         try:
             _spec = PyenvPythonSpec.from_string_spec(version_dir.name)
             _spec.is_supported(raise_exception=True)
