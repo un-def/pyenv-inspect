@@ -1,21 +1,12 @@
 import logging
+
 import pytest
 
 from pyenv_inspect import find_pyenv_python_executable
-from pyenv_inspect.inspect import log
 from pyenv_inspect.exceptions import UnsupportedImplementation
 from pyenv_inspect.spec import PyenvPythonSpec
 
 from tests.testlib import IS_POSIX, IS_WINDOWS
-
-
-class CapturingHandler(logging.Handler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.captured = []
-
-    def handle(self, record):
-        self.captured.append(record)
 
 
 class TestFindPyenvPythonExecutable:
@@ -63,16 +54,12 @@ class TestFindPyenvPythonExecutable:
         assert find_pyenv_python_executable(requested) == (
             self.versions_dir / expected / self.bin_dir / self.exec_name)
 
-    def test_env_links_ignored(self):
+    def test_env_links_ignored(self, caplog: pytest.LogCaptureFixture):
+        caplog.set_level(logging.WARNING)
         self.prepare_env('dev-env', '3.12.9')
-        handler = CapturingHandler()
-        log.addHandler(handler)
-        try:
-            assert find_pyenv_python_executable('3.12') == (
-                self.versions_dir / '3.12.9' / self.bin_dir / self.exec_name)
-        finally:
-            log.removeHandler(handler)
-        assert len(handler.captured) == 0
+        assert find_pyenv_python_executable('3.12') == (
+            self.versions_dir / '3.12.9' / self.bin_dir / self.exec_name)
+        assert len(caplog.messages) == 0
 
     @pytest.mark.parametrize('version', ['3.9', '3.7.3'])
     def test_not_found(self, version):
