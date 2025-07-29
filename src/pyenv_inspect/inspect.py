@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import os.path
 from pathlib import Path
 
 from .exceptions import ParseError, UnsupportedImplementation
@@ -27,12 +26,8 @@ def find_pyenv_python_executable(spec: PyenvPythonSpec | str) -> Path | None:
     best_match_dir: Path | None = None
     versions_dir = get_pyenv_versions_directory()
     for version_dir in versions_dir.iterdir():
-        if version_dir.is_symlink():
-            real_path = version_dir.resolve()
-            if os.path.commonpath([real_path, versions_dir]) == \
-                    os.path.commonpath([versions_dir]) and \
-                    'envs' in real_path.parts:
-                continue
+        if _is_pyenv_virtualenv_symlink(version_dir):
+            continue
         try:
             _spec = PyenvPythonSpec.from_string_spec(version_dir.name)
             _spec.is_supported(raise_exception=True)
@@ -50,3 +45,15 @@ def find_pyenv_python_executable(spec: PyenvPythonSpec | str) -> Path | None:
         return None
     log.debug('accepted %s', best_match_version)
     return get_pyenv_python_executable_path(best_match_dir)
+
+
+def _is_pyenv_virtualenv_symlink(path: Path) -> bool:
+    # {versions_dir}/{name} -> {versions_dir}/{version}/envs/{name}
+    if not path.is_symlink():
+        return False
+    real_path = path.resolve()
+    return (
+        real_path.is_relative_to(path.parent)
+        and real_path.parent.name == 'envs'
+        and real_path.name == path.name
+    )
