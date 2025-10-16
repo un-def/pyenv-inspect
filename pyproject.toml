@@ -6,13 +6,13 @@ build-backend = 'setuptools.build_meta'
 name = 'pyenv-inspect'
 description = 'An auxiliary library for the virtualenv-pyenv and tox-pyenv-redux plugins'
 readme = 'README.md'
-license = {text = 'MIT'}
+license = 'MIT'
+license-files = ['LICENSE']
 authors = [
     {name = 'Dmitry Meyer', email = 'me@undef.im'},
 ]
 classifiers = [
     'Development Status :: 4 - Beta',
-    'License :: OSI Approved :: MIT License',
     'Intended Audience :: Developers',
     'Topic :: Software Development :: Libraries',
     'Topic :: Utilities',
@@ -22,6 +22,7 @@ classifiers = [
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
     'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
 ]
 keywords = ['pyenv']
 requires-python = '>= 3.9'
@@ -32,6 +33,19 @@ Homepage = 'https://github.com/un-def/pyenv-inspect'
 Repository = 'https://github.com/un-def/pyenv-inspect.git'
 Changelog = 'https://github.com/un-def/pyenv-inspect/releases'
 Issues = 'https://github.com/un-def/pyenv-inspect/issues'
+
+[dependency-groups]
+lint = [
+    'isort',
+]
+test = [
+    'pytest',
+    'tox',
+]
+dev = [
+    {include-group = 'lint'},
+    {include-group = 'test'},
+]
 
 [tool.setuptools.dynamic]
 version = {attr = 'pyenv_inspect.__version__'}
@@ -62,6 +76,7 @@ envlist =
     py311
     py312
     py313
+    py314
     flake8
     isort
 isolated_build = true
