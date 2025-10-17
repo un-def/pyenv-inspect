@@ -1,9 +1,7 @@
-from __future__ import annotations
-
 import operator
 import re
-from functools import partial
-from typing import Any, Optional, Tuple
+from functools import cached_property, partial
+from typing import Callable, Optional, TypeVar, Union, overload
 
 from .exceptions import VersionParseError
 
@@ -13,43 +11,36 @@ VERSION_PATTERN = (
 VERSION_REGEX = re.compile(VERSION_PATTERN)
 
 
-class Readonly:
+class _comparison:
+    op: Callable[[object, object], bool]
 
-    def __set_name__(self, owner, name):
-        self.private_name = f'_{name}'
-
-    def __get__(self, instance, owner=None):
-        if instance is None:
-            return self
-        return getattr(instance, self.private_name)
-
-
-class Cached:
-
-    def __init__(self, func):
-        self.func = func
-
-    def __set_name__(self, owner, name):
-        self.name = name
-
-    def __get__(self, instance, owner=None):
-        if instance is None:
-            return self
-        res = instance.__dict__[self.name] = self.func(instance)
-        return res
-
-
-class Comparison:
+    _T = TypeVar('_T')
 
     def __set_name__(self, owner, name):
         self.op = getattr(operator, name)
 
-    def __get__(self, instance, owner=None):
+    @overload
+    def __get__(
+        self, instance: None, owner: Optional[type[_T]] = None,
+    ) -> "_comparison":
+        ...
+
+    @overload
+    def __get__(
+        self, instance: _T, owner: Optional[type[_T]] = None,
+    ) -> Callable[[object], bool]:
+        ...
+
+    def __get__(
+        self, instance: Optional[_T], owner: Optional[type[_T]] = None
+    ) -> Union["_comparison", Callable[[object], bool]]:
         if instance is None:
             return self
         return partial(self._compare, instance)
 
-    def _compare(self, left: Version, right: Any) -> bool:
+    def _compare(self, left: object, right: object) -> bool:
+        if not isinstance(left, Version):
+            return NotImplemented
         if not isinstance(right, Version):
             return NotImplemented
         return self.op(left._comparable, right._comparable)
@@ -59,31 +50,39 @@ class Version:
 
     def __init__(
         self,
-        base: Tuple[int, ...],
-        pre: Optional[Tuple[str, int]] = None,
+        base: tuple[int, ...],
+        pre: Optional[tuple[str, int]] = None,
         dev: bool = False,
     ) -> None:
         self._base = base
         self._pre = pre
         self._dev = dev
 
-    base = Readonly()
-    pre = Readonly()
-    dev = Readonly()
+    @property
+    def base(self) -> tuple[int, ...]:
+        return self._base
 
-    @Cached
-    def _base_short(self) -> Tuple:
+    @property
+    def pre(self) -> Optional[tuple[str, int]]:
+        return self._pre
+
+    @property
+    def dev(self) -> bool:
+        return self._dev
+
+    @cached_property
+    def _base_short(self) -> tuple[int, ...]:
         base = self._base
         for offset in range(len(base) - 1, -1, -1):
             if base[offset]:
                 return base[:offset + 1]
         return ()
 
-    @Cached
+    @cached_property
     def _hash(self) -> int:
         return hash((self._base_short, self._pre, self._dev))
 
-    @Cached
+    @cached_property
     def _string_version(self) -> str:
         string_version = '.'.join(map(str, self._base))
         if self._pre:
@@ -92,10 +91,10 @@ class Version:
             string_version = f'{string_version}-dev'
         return string_version
 
-    @Cached
+    @cached_property
     def _comparable(
         self,
-    ) -> Tuple[Tuple[int, ...], int, int, Optional[Tuple[str, int]]]:
+    ) -> tuple[tuple[int, ...], int, int, Optional[tuple[str, int]]]:
         return (
             self._base_short,
             -1 if self._dev else 0,
@@ -104,20 +103,20 @@ class Version:
         )
 
     @classmethod
-    def from_string_version(cls, string_version: str) -> Optional[Version]:
+    def from_string_version(cls, string_version: str) -> Optional["Version"]:
         match = VERSION_REGEX.fullmatch(string_version)
         if not match:
             raise VersionParseError(string_version)
         fields = match.groupdict()
-        fields['base'] = tuple(map(int, fields['base'].split('.')))
-        pre = fields['pre']
-        if pre:
-            if pre.startswith('rc'):
-                fields['pre'] = ('rc', int(pre[2:]))
+        base = tuple(map(int, fields['base'].split('.')))
+        pre: Optional[tuple[str, int]] = None
+        if _pre := fields['pre']:
+            if _pre.startswith('rc'):
+                pre = ('rc', int(_pre[2:]))
             else:
-                fields['pre'] = (pre[0], int(pre[1:]))
-        fields['dev'] = bool(fields['dev'])
-        return cls(**fields)
+                pre = (_pre[0], int(_pre[1:]))
+        dev = bool(fields['dev'])
+        return cls(base=base, pre=pre, dev=dev)
 
     def __str__(self) -> str:
         return self._string_version
@@ -128,7 +127,7 @@ class Version:
     def __hash__(self) -> int:
         return self._hash
 
-    def __contains__(self, item: Any) -> bool:
+    def __contains__(self, item: object) -> bool:
         if not isinstance(item, Version):
             return False
         if self._dev ^ item._dev:
@@ -143,9 +142,9 @@ class Version:
             item_base = item._base[:len(self._base)]
         return self._base == item_base
 
-    __eq__ = Comparison()
-    __ne__ = Comparison()
-    __lt__ = Comparison()
-    __le__ = Comparison()
-    __gt__ = Comparison()
-    __ge__ = Comparison()
+    __eq__ = _comparison()   # type: ignore
+    __ne__ = _comparison()   # type: ignore
+    __lt__ = _comparison()
+    __le__ = _comparison()
+    __gt__ = _comparison()
+    __ge__ = _comparison()
