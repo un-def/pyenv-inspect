@@ -30,6 +30,7 @@ def test_parse_error():
     ('2.0a1', '2.0', False),
     ('2.0a1', '2.0a2', False),
     ('2.0a1', '2.0b1', False),
+    ('3.14t', '3.14.0t', True),
 ])
 def test_eq_ne(str_v1, str_v2, expected):
     v1 = Version.from_string_version(str_v1)
@@ -40,6 +41,20 @@ def test_eq_ne(str_v1, str_v2, expected):
 
     assert eq_result is expected
     assert ne_result is (not expected)
+
+
+@pytest.mark.parametrize('str_v1,str_v2', [
+    ('3.14t', '3.14'),
+    ('3.14', '3.14t'),
+])
+def test_eq_ne_threading_model_error(str_v1, str_v2):
+    v1 = Version.from_string_version(str_v1)
+    v2 = Version.from_string_version(str_v2)
+
+    with pytest.raises(TypeError, match='threading model'):
+        v1 == v2
+    with pytest.raises(TypeError, match='threading model'):
+        v1 != v2
 
 
 @pytest.mark.parametrize('str_v1,str_v2,expected', [
@@ -114,6 +129,10 @@ def test_gt_le(str_v1, str_v2, expected):
     ('2.6.7a3', '2.6.7b3', False),
     ('2.6.7a3', '2.6.8a3', False),
     ('2.6.7a3', '2.6.7a3', True),
+    ('3.14.0t', '3.14t', True),
+    ('3.14.0t', '3.14', False),
+    ('3.14.0', '3.14t', False),
+    ('3.14.0', '3.14', True),
 ])
 def test_contains(str_v1, str_v2, expected):
     v1 = Version.from_string_version(str_v1)

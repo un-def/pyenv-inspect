@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import enum
 import re
 from typing import NamedTuple, Optional
@@ -25,13 +23,13 @@ class PyenvPythonSpec(NamedTuple):
     version: Optional[str]
 
     @classmethod
-    def from_string_spec(cls, string_spec: str) -> Optional[PyenvPythonSpec]:
+    def from_string_spec(cls, string_spec: str) -> "PyenvPythonSpec":
         is_cpython = string_spec[0].isdigit()
         if is_cpython:
             implementation = Implementation.CPYTHON
             match = CPYTHON_SPEC_REGEX.fullmatch(string_spec)
             if not match:
-                raise SpecParseError
+                raise SpecParseError(string_spec)
             version = match.group('version')
         else:
             implementation = Implementation.UNSUPPORTED

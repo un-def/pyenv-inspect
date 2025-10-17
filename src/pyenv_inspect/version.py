@@ -7,7 +7,11 @@ from .exceptions import VersionParseError
 
 
 VERSION_PATTERN = (
-    r'(?P<base>\d(?:\.\d+){0,2})(?:(?P<pre>(?:a|b|rc)\d+)?|-(?P<dev>dev))')
+    r'(?P<base>\d(?:\.\d+){0,2})'
+    r'(?P<pre>(?:a|b|rc)\d+)?'
+    r'(?P<free_threaded>t)?'
+    r'(?P<dev>-dev)?'
+)
 VERSION_REGEX = re.compile(VERSION_PATTERN)
 
 
@@ -43,6 +47,9 @@ class _comparison:
             return NotImplemented
         if not isinstance(right, Version):
             return NotImplemented
+        if left._free_threaded != right._free_threaded:
+            raise TypeError(
+                f'threading model must be the same: {left}, {right}')
         return self.op(left._comparable, right._comparable)
 
 
@@ -53,10 +60,12 @@ class Version:
         base: tuple[int, ...],
         pre: Optional[tuple[str, int]] = None,
         dev: bool = False,
+        free_threaded: bool = False,
     ) -> None:
         self._base = base
         self._pre = pre
         self._dev = dev
+        self._free_threaded = free_threaded
 
     @property
     def base(self) -> tuple[int, ...]:
@@ -69,6 +78,10 @@ class Version:
     @property
     def dev(self) -> bool:
         return self._dev
+
+    @property
+    def free_threaded(self) -> bool:
+        return self._free_threaded
 
     @cached_property
     def _base_short(self) -> tuple[int, ...]:
@@ -87,6 +100,8 @@ class Version:
         string_version = '.'.join(map(str, self._base))
         if self._pre:
             string_version = f'{string_version}{self._pre[0]}{self._pre[1]}'
+        if self._free_threaded:
+            string_version = f'{string_version}t'
         if self._dev:
             string_version = f'{string_version}-dev'
         return string_version
@@ -116,7 +131,8 @@ class Version:
             else:
                 pre = (_pre[0], int(_pre[1:]))
         dev = bool(fields['dev'])
-        return cls(base=base, pre=pre, dev=dev)
+        free_threaded = bool(fields['free_threaded'])
+        return cls(base=base, pre=pre, dev=dev, free_threaded=free_threaded)
 
     def __str__(self) -> str:
         return self._string_version
@@ -130,7 +146,9 @@ class Version:
     def __contains__(self, item: object) -> bool:
         if not isinstance(item, Version):
             return False
-        if self._dev ^ item._dev:
+        if self._free_threaded != item._free_threaded:
+            return False
+        if self._dev != item._dev:
             return False
         if self._pre != item._pre:
             return False
